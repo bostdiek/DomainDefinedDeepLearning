@@ -1,60 +1,325 @@
-# Domain Defined Deep Learning
+# Physics-Informed Neural Networks (PINNs): A Hands-On Course
 
-## Context
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.9+-ee4c2c.svg)](https://pytorch.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-AI is a prediction machine. The key idea behind AI has been that it is 100% based on learning patterns from data using statistics and powerful computers. While this is extremely powerful, it is requiring large amounts of data and computational power.
+A comprehensive tutorial series on **Physics-Informed Neural Networks (PINNs)** — teaching how to embed physical laws directly into neural network training. This course progresses from simple ODEs to complex PDEs, building intuition through hands-on examples.
 
-Moreover, there are application of AI, where we may have more information than just the observational data. In these cases, if we could capture that information in the AI model, it would likely be more accurate and require less data and computational power.
+## 🎯 Learning Objectives
 
-![The three dimensions of traditional AI](AI.png)
+By completing this course, you will:
 
-The idea behind domain driven AI is to include additional domain knowledge into the AI models. This is particularly powerful when the domain can be described using quantitative methods, such as mathematical sciences.
+1. **Understand the PINN paradigm**: Learn why and when to embed physics into neural networks
+2. **Master automatic differentiation**: Use PyTorch autograd to compute derivatives through networks
+3. **Solve forward problems**: Predict system behavior given physical parameters and equations
+4. **Solve inverse problems**: Estimate unknown physical parameters from noisy observations
+5. **Handle increasing complexity**: Progress from 1D ODEs to 2D PDEs with shock formation
+6. **Recognize PINN limitations**: Understand when PINNs struggle (e.g., sharp gradients, shocks)
 
-In general, they domain knowledge can be used to define the architecture (i.e functional form) of the AI models and/or the training methodology of the AI model. We will show examples of both applications and of course, they can be combined as well. The hope is that with this additional information the reliance on data and computation can be reduced and thus pave the way for much more scalable and efficient AI models.
+## 📚 Course Structure
 
-![Adding the fourth dimension of domain](domAI.png)
+The course consists of three progressively challenging notebooks:
 
-## Physics informed Neural Networks (PiNNs)
+### Notebook 1: Simple Harmonic Oscillator
+**File:** `notebooks/01_simple_harmonic_oscillator.ipynb`
 
-The idea behind PiNNs is to include the 'knowledge' of physics into the AI model. There are equations that define the behaviour of physical objects in the world and the in a PiNN, this equation is directly put into the loss function. 
+| Topic | Description |
+|-------|-------------|
+| **Physics** | Undamped oscillator: $\ddot{x} + \omega^2 x = 0$ |
+| **Concepts** | Loss functions, vanilla NN vs PINN, initial conditions |
+| **Key Insight** | Physics constraints prevent overfitting and enable extrapolation |
 
-In general, the loss function of PiNN takes the following form:
+**What you'll implement:**
+- Neural network architecture with tanh activation
+- Data loss (MSE) for fitting observations
+- Physics loss encoding the ODE
+- Comparison: vanilla NN fails to extrapolate, PINN succeeds
+
+---
+
+### Notebook 2: Damped Harmonic Oscillator
+**File:** `notebooks/02_damped_harmonic_oscillator.ipynb`
+
+| Topic | Description |
+|-------|-------------|
+| **Physics** | Damped oscillator: $\ddot{x} + \gamma\dot{x} + kx = 0$ |
+| **Regimes** | Underdamped, critically damped, overdamped |
+| **Advanced** | Inverse problem — learn damping coefficient from data |
+
+**What you'll implement:**
+- Forward problem for all three damping regimes
+- Inverse problem: estimate unknown $\gamma$ from noisy observations
+- Parameterized PINN: one network for any $(d, \omega_0)$ values
+
+**Key equations:**
+
+| Regime | Condition | Solution Behavior |
+|--------|-----------|-------------------|
+| Underdamped | $\gamma^2 < 4mk$ | Oscillates with decay |
+| Critically damped | $\gamma^2 = 4mk$ | Fastest return to equilibrium |
+| Overdamped | $\gamma^2 > 4mk$ | Slow exponential decay |
+
+---
+
+### Notebook 3: Burgers' Equation
+**File:** `notebooks/03_burgers_equation.ipynb`
+
+| Topic | Description |
+|-------|-------------|
+| **Physics** | Viscous Burgers: $u_t + u u_x = \nu u_{xx}$ |
+| **Challenge** | Shock formation, nonlinear PDE, 2D input (t, x) |
+| **Validation** | Finite-difference reference solver comparison |
+
+**What you'll implement:**
+- 2D PINN architecture: $(t, x) \rightarrow u$
+- PDE residual with mixed partial derivatives
+- Shock diagnostics: gradient magnitude heatmaps
+- Viscosity sweep: see how PINN accuracy degrades with sharper shocks
+
+**Key physics:**
+- Shock formation time: $t^* = 1/\pi \approx 0.318$ for $u(0,x) = -\sin(\pi x)$
+- Low viscosity → sharp shocks → higher PINN error
+- Collocation density study: more physics points → better accuracy
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.13 or higher
+- Basic understanding of:
+  - Neural networks and PyTorch
+  - Differential equations (ODEs and PDEs)
+  - Calculus (derivatives, gradients)
+
+### Installation
+
+#### Option 1: Using uv (Recommended)
+
+```bash
+# Clone the repository
+git clone https://github.com/DarshKodwani/DomainDefinedDeepLearning.git
+cd DomainDefinedDeepLearning
+
+# Install dependencies with uv
+uv sync
+
+# Launch Jupyter
+uv run jupyter notebook
+```
+
+#### Option 2: Using pip
+
+```bash
+# Clone the repository
+git clone https://github.com/DarshKodwani/DomainDefinedDeepLearning.git
+cd DomainDefinedDeepLearning
+
+# Create virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Launch Jupyter
+jupyter notebook
+```
+
+#### Option 3: Using Dev Container (VS Code)
+
+1. Install [Docker](https://www.docker.com/get-started) and the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+2. Open the repository in VS Code
+3. Click "Reopen in Container" when prompted (or use `Cmd/Ctrl + Shift + P` → "Dev Containers: Open Folder in Container")
+
+### Dependencies
+
+| Package | Version | Purpose |
+|---------|---------|---------|
+| `torch` | ≥2.9.1 | Neural networks, autograd |
+| `numpy` | ≥2.4.0 | Numerical operations |
+| `matplotlib` | ≥3.10.8 | Visualization |
+| `notebook` | ≥7.5.1 | Jupyter notebooks |
+| `ipykernel` | ≥7.1.0 | Jupyter kernel |
+
+---
+
+## 📖 Pedagogical Approach
+
+### For Instructors
+
+Each notebook follows a consistent structure:
+
+1. **Learning Objectives** — Clear goals at the start
+2. **Physics Background** — Mathematical derivation with LaTeX equations
+3. **Implementation** — Code cells with `# TODO` comments for students
+4. **Validation** — Assert statements to verify implementations
+5. **Visualization** — Rich plots showing physics and PINN behavior
+6. **Summary** — Key takeaways and references
+
+### Code Structure
+
+Student exercises are marked with:
+```python
+# TODO: Description of what to implement
+# Hint: Helpful guidance
+
+# SOLUTION START
+# ... instructor solution ...
+# SOLUTION END
+```
+
+### Key Concepts Covered
+
+| Concept | Notebook 1 | Notebook 2 | Notebook 3 |
+|---------|:----------:|:----------:|:----------:|
+| Neural network basics | ✅ | ✅ | ✅ |
+| Automatic differentiation | ✅ | ✅ | ✅ |
+| Physics loss function | ✅ | ✅ | ✅ |
+| Initial conditions | ✅ | ✅ | ✅ |
+| Boundary conditions | — | — | ✅ |
+| Forward problem | ✅ | ✅ | ✅ |
+| Inverse problem | — | ✅ | — |
+| Multiple regimes | — | ✅ | ✅ |
+| Parameterized PINN | — | ✅ | — |
+| Shock/sharp gradients | — | — | ✅ |
+| Numerical validation | — | — | ✅ |
+
+---
+
+## 🔬 The PINN Framework
+
+### What is a Physics-Informed Neural Network?
+
+Traditional neural networks learn purely from data. **PINNs** augment this with physical constraints:
 
 $$
-L_{total} = L_{data} + L_{physics}
+\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{data}} + \lambda \cdot \mathcal{L}_{\text{physics}}
 $$
 
-where $L_{data}$ is the loss function defined to learn from data. An example of this is mean squared error. $L_{physics}$ is the loss function containing a physics equation, for instance it could be the differential equation describing a Harmonic oscillator.
+Where:
+- $\mathcal{L}_{\text{data}}$: Fit observations (e.g., initial/boundary conditions)
+- $\mathcal{L}_{\text{physics}}$: Satisfy the governing differential equation
 
-## How to use this repo
+### Why PINNs?
 
-The notebooks folder contains walkthrough notebooks of specific examples. 
-If new notebooks are to be added with new examples, please make sure they include the mathematical descriptions where appropriate, as well as the code.
-Then, if possible, please include a non-notebook python version that can be used for batch training etc. (eventually on Azure)
+| Traditional ML | Physics-Informed ML |
+|----------------|---------------------|
+| Requires lots of data | Works with sparse data |
+| May violate physics | Respects physical laws |
+| Interpolation only | Can extrapolate |
+| Black box | Interpretable constraints |
 
-### Getting Started with Devcontainer
+### When to Use PINNs
 
-To get started with the devcontainer, follow these steps:
+✅ **Good for:**
+- Sparse or expensive data
+- Well-known governing equations
+- Smooth solutions
+- Inverse problems (parameter estimation)
 
-1. Install Docker: If you don't have Docker installed, you can download and install it from the official Docker website (https://www.docker.com/get-started).
+⚠️ **Challenging for:**
+- Sharp gradients / shocks
+- Highly turbulent flows
+- Discontinuous solutions
+- Very high-dimensional problems
 
-2. Install the Remote - Containers extension: Open Visual Studio Code and install the Remote - Containers extension. This extension allows you to develop inside a containerized environment. You can find the extension in the Visual Studio Code marketplace.
+---
 
-3. Open the workspace in a container: Once you have Docker and the Remote - Containers extension installed, open the repository in Visual Studio Code. You will see a notification asking if you want to reopen the repository in a container. Click on "Reopen in Container" to open the workspace inside a container.
+## 📁 Repository Structure
 
-    If the notification doesn't appear, you can manually open the workspace in a container by following these steps:
-    - Mac: Press `Cmd + Shift + P` to open the command palette, then search for "Dev Containers: Open Folder in Container" and select it.
-    - Windows: Press `Ctrl + Shift + P` to open the command palette, then search for "Dev Containers: Open Folder in Container" and select it.
+```
+DomainDefinedDeepLearning/
+├── README.md                 # This file
+├── LICENSE                   # MIT License
+├── pyproject.toml           # Project configuration
+├── requirements.txt         # Pip dependencies
+├── notebooks/
+│   ├── 01_simple_harmonic_oscillator.ipynb
+│   ├── 02_damped_harmonic_oscillator.ipynb
+│   └── 03_burgers_equation.ipynb
+├── plots/                   # Generated figures
+└── .devcontainer/          # VS Code dev container config
+```
 
-That's it! You are now ready to start using the devcontainer for development in this repository.
+---
 
-### Tutorials Notebooks
+## 📚 References
 
-1. Introduction to including physics loss with the Simple Harmonic Oscillator. This notebook, [SHO.ipynb](notebooks/SHO.ipynb), gives you a basic introduction of how to use autgorad within pytorch to add the differential equation and the boundary/initial conditions as loss terms in addition to the data loss. 
-    
-    - _example solutions_: [SHO_answers.ipynb](notebooks/SHO_answers.ipynb)
+### Foundational Papers
 
-2. Exapand the solution to the SHO by introducing a damping term. This notebook, [SHO_damped.ipynb](notebooks/SHO_damped.ipynb), adds an extra term to the differntial equation. Additionally, it shows how we can use the physics loss to learn (infer) the damping coefficient. 
-    
-    - _example solutions_: [SHO_damped_answers.ipynb](notebooks/SHO_damped_answers.ipynb)
+1. **Raissi, M., Perdikaris, P., & Karniadakis, G. E.** (2019). Physics-informed neural networks: A deep learning framework for solving forward and inverse problems involving nonlinear partial differential equations. *Journal of Computational Physics*, 378, 686-707. [DOI](https://doi.org/10.1016/j.jcp.2018.10.045)
+
+2. **Lagaris, I. E., Likas, A., & Fotiadis, D. I.** (1998). Artificial neural networks for solving ordinary and partial differential equations. *IEEE Transactions on Neural Networks*, 9(5), 987-1000. [DOI](https://doi.org/10.1109/72.712178)
+
+3. **Karniadakis, G. E., et al.** (2021). Physics-informed machine learning. *Nature Reviews Physics*, 3(6), 422-440. [DOI](https://doi.org/10.1038/s42254-021-00314-5)
+
+### Additional Resources
+
+- [DeepXDE Library](https://github.com/lululxvi/deepxde) — Popular PINN library
+- [NVIDIA Modulus](https://developer.nvidia.com/modulus) — Industrial-scale physics-ML framework
+- [PyTorch Autograd Tutorial](https://pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html)
+
+---
+
+## 🛠️ Development
+
+### Code Quality
+
+We use [Ruff](https://github.com/astral-sh/ruff) for linting and formatting:
+
+```bash
+# Check for issues
+uv run ruff check notebooks/
+
+# Auto-fix issues
+uv run ruff check --fix notebooks/
+
+# Format code
+uv run ruff format notebooks/
+```
+
+Configuration in `pyproject.toml`:
+```toml
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+extend-select = ["I"]  # Import sorting
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run `ruff check` and `ruff format`
+5. Submit a pull request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👥 Authors
+
+- Physics-Informed Neural Networks Course Development Team
+- Microsoft AI for Good Research Lab
+
+---
+
+## 🙏 Acknowledgments
+
+- The PINN community for foundational research
+- PyTorch team for automatic differentiation
+- Students and instructors who provided feedback
+
+---
+
+*Last updated: December 2025*
 
